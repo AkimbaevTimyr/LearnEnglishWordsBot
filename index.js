@@ -1,4 +1,5 @@
 require("dotenv").config()
+const axios = require("axios")
 const TelegramApi = require("node-telegram-bot-api")
 const bot = new TelegramApi(process.env.TOKEN, {polling: true})
 const getAll = require("./modules/getAll")
@@ -19,3 +20,9 @@ const start = async () =>{
 start()
 
 
+
+
+await axios.post(`https://api.telegram.org/bot${process.env.TOKEN}/sendMessage`, {
+  chat_id: JSON.parse(event.body).message.chat.id,
+  text: "I got your message!",
+});
