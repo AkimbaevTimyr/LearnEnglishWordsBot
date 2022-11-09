@@ -1,17 +1,31 @@
 const run = require('./runBot')
 
-async function addWord(chatId, bot){
-    const namePrompt = await bot.sendMessage(chatId, "Введите слово через тире. Пример: word-слово", {
+
+async function sendPropmt(chatId, bot){
+    return await bot.sendMessage(chatId, "Введите слово через тире. Пример: word-слово", {
         reply_markup: {
             force_reply: true,
         },
-    });
-    bot.onReplyToMessage(chatId, namePrompt.message_id, async (nameMsg) => {
-        const name = nameMsg.text.split("-")
-        const doc = {englishName: name[0], russiaName: name[1]}
-        run(doc).catch(console.dir);
-        await bot.sendMessage(chatId, `Слово добавлено`);
-    });
+    })
+}
+
+async function replyMessage(msg, chatId, bot){
+    const name = msg.text.split("-")
+        if(name.length < 2){
+            await bot.sendMessage(chatId, "Вы не правильно ввели слово")
+            const namePrompt = await sendPropmt(chatId, bot)
+            bot.onReplyToMessage(chatId, namePrompt.message_id, async (msg) => replyMessage(msg, chatId, bot));
+        }else{
+            const doc = {englishName: name[0], russiaName: name[1]}
+            run(doc).catch(console.dir);
+            await bot.sendMessage(chatId, `Слово добавлено`);
+        }
+        
+}
+
+async function addWord(chatId, bot){
+    const namePrompt = await sendPropmt(chatId, bot)
+    bot.onReplyToMessage(chatId, namePrompt.message_id, async (msg) => replyMessage(msg, chatId, bot));
 }
 
 

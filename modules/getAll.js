@@ -1,4 +1,5 @@
 const getRandomInt = require('../helpers/getRandomInt')
+const {wordOptions} = require("../options")
 
 
 async function getAnotherWord(client){
@@ -10,7 +11,7 @@ async function getAnotherWord(client){
 }
 
 async function sendPropmt(chatId, word, bot){
-    return await bot.sendMessage(chatId, `Переведите это слово ${word}`, {
+    return await bot.sendMessage(chatId, `Переведите это слово ${word}`,   {
         reply_markup: {
             force_reply: true,
         },
@@ -23,6 +24,8 @@ async function replyMessage(client, msg, word, bot){
     const w = await db.collection("words").findOne({ englishName: `${word}` })
     const russiaNameFromPerson = msg.text.toLowerCase()
     const russiaNameFromDb = w.russiaName.toLowerCase()
+
+
     if (russiaNameFromPerson === russiaNameFromDb) {
         const anotherWord = await getAnotherWord(client)
         await bot.sendMessage(chatId, 'Вы ответили верно')
