@@ -98,4 +98,4 @@ async function getAll(chatId , client, bot) {
 
 
 
-module.exports = getAll
+module.exports = getAlllll
