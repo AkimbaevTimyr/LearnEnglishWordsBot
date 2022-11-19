@@ -18,6 +18,7 @@ const start = async () =>{
   bot.onText(/\/add/, async msg => addWord(msg.chat.id, bot))
   bot.onText(/\/learn/, async msg => getAll(msg.chat.id, client, bot))
   bot.onText(/\/count/, async msg => getCount(msg.chat.id, client, bot))
+
 }
 
 start()
