@@ -2,7 +2,7 @@ require("dotenv").config()
 const TelegramApi = require("node-telegram-bot-api")
 const bot = new TelegramApi(process.env.TOKEN, {polling: true})
 
-const getAll = require("./modules/getAll")
+const startLearn = require("./modules/startLearn1/startLearn")
 const addWord = require("./modules/addWord")
 const getCount = require("./modules/getCount")
 
@@ -16,7 +16,7 @@ const start = async () =>{
     {command: '/count', description: 'Количество слов в словаре'},
   ])
   bot.onText(/\/add/, async msg => addWord(msg.chat.id, bot))
-  bot.onText(/\/learn/, async msg => getAll(msg.chat.id, client, bot))
+  bot.onText(/\/learn/, async msg => startLearn(msg.chat.id, client, bot))
   bot.onText(/\/count/, async msg => getCount(msg.chat.id, client, bot))
 
 }
