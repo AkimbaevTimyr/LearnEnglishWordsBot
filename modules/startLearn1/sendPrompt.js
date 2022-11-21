@@ -7,4 +7,4 @@ async function sendPrompt(chatId, word, bot){
 }
 
 
-module.exports = sendPrompt
+module.exports = sendPrompt 
