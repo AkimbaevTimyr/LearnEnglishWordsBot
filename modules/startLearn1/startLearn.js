@@ -1,13 +1,9 @@
 const replyButtons = require('./replyButtons')
 const sendPrompt = require('./sendPrompt')
 const getAnotherWord = require('./getAnotherWord')
+const messagePrompt = require("./messagePrompt")
 
 
-
-async function messagePrompt(chatId, word, bot, text){
-    await bot.sendMessage(chatId, text)
-    return  await sendPrompt(chatId, word, bot)
-}
 
 async function replyMessage(client, msg, word, bot){
     const chatId = msg.chat.id;
@@ -41,9 +37,6 @@ async function replyMessage(client, msg, word, bot){
         })
     }
 }
-
-
-
 
 async function startLearn(chatId , client, bot) {
     client.connect(async () => {
