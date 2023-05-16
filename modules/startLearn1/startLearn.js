@@ -2,24 +2,26 @@ const replyButtons = require('./replyButtons')
 const sendPrompt = require('./sendPrompt')
 const getAnotherWord = require('./getAnotherWord')
 const messagePrompt = require("./messagePrompt")
+const { connectToDatabase } = require('../../helpers/connectToDataBase');
+const bot = require('../../helpers/telegram')
 
 
 
-async function replyMessage(client, msg, word, bot){
+async function replyMessage(msg, word){
     const chatId = msg.chat.id;
-    const db = client.db("telegramBot")
+    const db = await connectToDatabase();
     const w = await db.collection("words").findOne({ englishName: `${word}` })
     const russiaNameFromDb = w.russiaName.toLowerCase()
     const russiaNameFromPerson = msg.text.toLowerCase()
 
-    if (russiaNameFromPerson === russiaNameFromDb) {
-        const anotherWord = await getAnotherWord(client)
-        const namePrompt = await messagePrompt(chatId, anotherWord, bot, "Вы ответили верно")
-        bot.onReplyToMessage(chatId, namePrompt.message_id, (msg)=> replyMessage(client, msg, anotherWord, bot));
+    if (russiaNameFromPerson.trim() === russiaNameFromDb.trim()) {
+        const anotherWord = await getAnotherWord()
+        const namePrompt = await messagePrompt(chatId, anotherWord, "Вы ответили верно")
+        bot.onReplyToMessage(chatId, namePrompt.message_id, (msg)=> replyMessage(msg, anotherWord));
     } else {
-        const namePrompt = await messagePrompt(chatId, word, bot, "Вы ответили не верно")
-        replyButtons(chatId, bot)
-        bot.onReplyToMessage(chatId, namePrompt.message_id, (msg)=> replyMessage(client, msg, word, bot));
+        const namePrompt = await messagePrompt(chatId, word, "Вы ответили не верно")
+        replyButtons(chatId)
+        bot.onReplyToMessage(chatId, namePrompt.message_id, (msg)=> replyMessage(msg, word));
 
         bot.on('callback_query', async function onCallbackQuery(callbackQuery) {
             const action = callbackQuery.data;
@@ -31,32 +33,29 @@ async function replyMessage(client, msg, word, bot){
                 text: 'null'
             };
             if(action === 'translate'){
-                translateWord = `${word} - ${russiaNameFromDb}`
+                const www = JSON.parse(JSON.stringify(await db.collection("words").findOne({ englishName: `${word}` })));
+                const odin = www.russiaName;
+                const dva = www.englishName;
+                translateWord = `${dva} - ${odin}`
                 bot.editMessageText(translateWord,  opts);
             }
         })
     }
 }
 
-async function startLearn(chatId , client, bot) {
-    client.connect(async () => {
-        try {
-            const word = await getAnotherWord(client)
-            const namePrompt = await sendPrompt(chatId, word, bot)
-            bot.onReplyToMessage(chatId, namePrompt.message_id, (msg)=> replyMessage(client, msg, word, bot));
+async function startLearn(chatId) {
+    const word = await getAnotherWord()
+    const namePrompt = await sendPrompt(chatId, word)
+    bot.onReplyToMessage(chatId, namePrompt.message_id, (msg)=> replyMessage(msg, word));
 
-            bot.on('callback_query', async function onCallbackQuery(callbackQuery) {
-                const action = callbackQuery.data;
-                const msg = callbackQuery.message;
-                const chatId = msg.chat.id
-                const word = await getAnotherWord(client)
-                if (action === 'skip') {
-                    const namePrompt = await sendPrompt(chatId, word, bot)
-                    bot.onReplyToMessage(chatId, namePrompt.message_id, async (msg)=>  await replyMessage(client, msg, word, bot));
-                }
-            })
-        } finally {
-
+    bot.on('callback_query', async function onCallbackQuery(callbackQuery) {
+        const action = callbackQuery.data;
+        const msg = callbackQuery.message;
+        const chatId = msg.chat.id
+        const word = await getAnotherWord()
+        if (action === 'skip') {
+            const namePrompt = await sendPrompt(chatId, word)
+            bot.onReplyToMessage(chatId, namePrompt.message_id, async (msg)=>  await replyMessage(msg, word));
         }
     })
 }

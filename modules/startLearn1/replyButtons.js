@@ -1,4 +1,6 @@
-async function replyButtons(chatId, bot){
+const bot = require('../../helpers/telegram')
+
+async function replyButtons(chatId){
     const opts = {
         reply_markup: {
         inline_keyboard: [

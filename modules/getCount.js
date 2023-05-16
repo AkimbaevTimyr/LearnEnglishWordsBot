@@ -1,14 +1,9 @@
-
-async function getCount(chatId, client, bot){
-    client.connect(async () => {
-        try{
-            const db = client.db("telegramBot")
-            const count = await db.collection("words").estimatedDocumentCount()
-            await bot.sendMessage(chatId, `В словаре ${count} слов`)
-        }finally {
-
-        }
-    })   
+const { connectToDatabase } = require('../helpers/connectToDataBase');
+const bot = require('../helpers/telegram')
+async function getCount(chatId){
+    const db = await connectToDatabase();
+    const count = await db.collection("words").estimatedDocumentCount()
+    await bot.sendMessage(chatId, `В словаре ${count} слов`)
 }
 
 module.exports = getCount
